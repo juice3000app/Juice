@@ -208,9 +208,9 @@
 
 <div id="controls">
   <div id="color-btns">
-    <button class="color-btn green-btn" onclick="startTracking('green')">GREEN</button>
-    <button class="color-btn pink-btn"  onclick="startTracking('pink')">PINK</button>
-    <button class="color-btn blue-btn"  onclick="startTracking('blue')">BLUE</button>
+    <button class="color-btn green-btn" onclick="startTracking('green')">FEET</button>
+    <button class="color-btn pink-btn"  onclick="startTracking('pink')">BOARD</button>
+    <button class="color-btn blue-btn"  onclick="startTracking('blue')">WHEELS</button>
   </div>
   <button id="stop-btn" onclick="stopTracking()">STOP TRACKING</button>
   <div id="util-btns">
@@ -247,6 +247,7 @@ const STORAGE_KEY    = 'juice_tracks_v2';
 const MIN_DIST_M     = 8;
 const COLORS = { green:'#39ff14', pink:'#ff2d78', blue:'#00cfff' };
 
+const MODE_LABELS = { green:'FEET', pink:'BOARD', blue:'WHEELS' };
 let gmap=null, watchId=null, isTracking=false, activeColor=null;
 let sessionCoords=[], sessionKm=0, lastPoint=null;
 let allSegments=[];  // [{coords:[[lng,lat],...], color:'green'|'pink'|'blue'}, ...]
@@ -356,7 +357,7 @@ function startTracking(color) {
   const lbl=document.getElementById('rec-label');
   const c=COLORS[color];
   dot.style.background=c; dot.style.boxShadow=`0 0 8px ${c},0 0 20px ${c}aa`;
-  lbl.textContent=color.toUpperCase()+' TRACKING'; lbl.style.color=c; lbl.style.textShadow=`0 0 4px ${c}`;
+  lbl.textContent=(MODE_LABELS[color]||color.toUpperCase())+' TRACKING'; lbl.style.color=c; lbl.style.textShadow=`0 0 4px ${c}`;
   document.getElementById('rec-indicator').classList.add('active');
 
   watchId=navigator.geolocation.watchPosition(onPosition,onGPSError,{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
