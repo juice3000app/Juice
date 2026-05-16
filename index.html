@@ -7,8 +7,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Juice">
 <title>Juice</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW failed:', e));
+    });
+  }
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap');
 
@@ -251,6 +260,24 @@ const MODE_LABELS = { green:'FEET', pink:'BOARD', blue:'WHEELS' };
 let gmap=null, watchId=null, isTracking=false, activeColor=null;
 let sessionCoords=[], sessionKm=0, lastPoint=null;
 let allSegments=[];  // [{coords:[[lng,lat],...], color:'green'|'pink'|'blue'}, ...]
+let wakeLock=null;
+
+
+// ── WAKE LOCK ──
+async function acquireWakeLock() {
+  if (!('wakeLock' in navigator)) return; // not supported (iOS 16.4+ only)
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => { wakeLock=null; });
+  } catch(e) { console.warn('Wake lock failed:', e); }
+}
+async function releaseWakeLock() {
+  if (wakeLock) { await wakeLock.release(); wakeLock=null; }
+}
+// Re-acquire wake lock if page becomes visible again (e.g. user switches back)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState==='visible' && isTracking) acquireWakeLock();
+});
 
 // ── STORAGE ──
 function save() {
@@ -361,11 +388,13 @@ function startTracking(color) {
   document.getElementById('rec-indicator').classList.add('active');
 
   watchId=navigator.geolocation.watchPosition(onPosition,onGPSError,{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
+  acquireWakeLock();
 }
 
 function stopTracking() {
   isTracking=false;
   if (watchId!==null) { navigator.geolocation.clearWatch(watchId); watchId=null; }
+  releaseWakeLock();
   if (sessionCoords.length>=2) { allSegments.push({coords:[...sessionCoords],color:activeColor}); save(); }
   sessionCoords=[]; sessionKm=0; lastPoint=null; activeColor=null;
 
