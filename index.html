@@ -15,205 +15,170 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --neon: #39ff14;
-    --neon-dim: rgba(57, 255, 20, 0.15);
-    --neon-glow: 0 0 8px #39ff14, 0 0 20px #39ff14aa;
     --bg: #0a0a0a;
     --panel: rgba(10,10,10,0.88);
     --text: #e8e8e8;
     --muted: #555;
+    --green: #39ff14;
+    --pink:  #ff2d78;
+    --blue:  #00cfff;
   }
 
-  html, body {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    background: var(--bg);
-    font-family: 'Space Mono', monospace;
-    color: var(--text);
-  }
+  html, body { height: 100%; width: 100%; overflow: hidden; background: var(--bg); font-family: 'Space Mono', monospace; color: var(--text); }
 
-  #map {
-    position: absolute;
-    inset: 0;
-  }
+  #map { position: absolute; inset: 0; }
 
   /* HUD */
   #hud {
     position: absolute;
     top: env(safe-area-inset-top, 16px);
     left: 0; right: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    pointer-events: none;
-    z-index: 10;
-    padding-top: 12px;
+    display: flex; flex-direction: column; align-items: center;
+    pointer-events: none; z-index: 10; padding-top: 12px;
   }
 
   #wordmark {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.4rem;
-    letter-spacing: 0.12em;
-    color: var(--neon);
-    text-shadow: var(--neon-glow);
+    font-size: 2.4rem; letter-spacing: 0.12em;
+    color: var(--green);
+    text-shadow: 0 0 8px var(--green), 0 0 20px #39ff14aa;
     line-height: 1;
   }
 
   #stats-bar {
-    margin-top: 6px;
-    background: var(--panel);
-    border: 1px solid rgba(57,255,20,0.25);
-    border-radius: 4px;
-    padding: 6px 18px;
-    display: flex;
-    gap: 24px;
-    align-items: center;
+    margin-top: 6px; background: var(--panel);
+    border: 1px solid rgba(57,255,20,0.25); border-radius: 4px;
+    padding: 6px 18px; display: flex; gap: 24px; align-items: center;
     backdrop-filter: blur(12px);
   }
 
-  .stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  .stat { display: flex; flex-direction: column; align-items: center; }
+  .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--green); text-shadow: 0 0 6px #39ff1488; letter-spacing: 0.05em; }
+  .stat-label { font-size: 0.55rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 1px; }
+  .stat-divider { width: 1px; height: 28px; background: rgba(57,255,20,0.2); }
 
-  .stat-value {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--neon);
-    text-shadow: 0 0 6px #39ff1488;
-    letter-spacing: 0.05em;
-  }
-
-  .stat-label {
-    font-size: 0.55rem;
-    color: var(--muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-top: 1px;
-  }
-
-  .stat-divider {
-    width: 1px;
-    height: 28px;
-    background: rgba(57,255,20,0.2);
-  }
-
-  /* Recording pulse */
   #rec-indicator {
-    display: none;
-    align-items: center;
-    gap: 6px;
-    margin-top: 5px;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    color: var(--neon);
-    text-shadow: 0 0 4px #39ff14;
+    display: none; align-items: center; gap: 6px; margin-top: 5px;
+    font-size: 0.6rem; letter-spacing: 0.2em;
   }
-
   #rec-indicator.active { display: flex; }
-
-  .rec-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--neon);
-    box-shadow: var(--neon-glow);
-    animation: pulse 1s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.3; transform: scale(0.7); }
-  }
+  .rec-dot { width: 7px; height: 7px; border-radius: 50%; animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.7)} }
 
   /* Controls */
   #controls {
     position: absolute;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
+    left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
     z-index: 10;
   }
 
-  #track-btn {
+  #color-btns { display: flex; gap: 10px; align-items: center; transition: opacity 0.2s; }
+
+  .color-btn {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.3rem;
-    letter-spacing: 0.15em;
-    background: transparent;
-    color: var(--neon);
-    border: 2px solid var(--neon);
-    border-radius: 4px;
-    padding: 10px 36px;
-    cursor: pointer;
-    text-shadow: 0 0 8px #39ff14;
-    box-shadow: 0 0 12px #39ff1444, inset 0 0 12px #39ff1411;
-    transition: all 0.15s ease;
+    font-size: 1.05rem; letter-spacing: 0.12em;
+    background: transparent; border: 2px solid; border-radius: 4px;
+    padding: 9px 20px; cursor: pointer;
+    transition: all 0.15s ease; white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
   }
 
-  #track-btn:active {
-    background: var(--neon-dim);
-    box-shadow: 0 0 24px #39ff1488, inset 0 0 20px #39ff1422;
-  }
+  .color-btn.green-btn { color:var(--green); border-color:var(--green); text-shadow:0 0 8px var(--green); box-shadow:0 0 12px #39ff1444,inset 0 0 10px #39ff1411; }
+  .color-btn.green-btn:active { background:rgba(57,255,20,.12); box-shadow:0 0 22px #39ff1488,inset 0 0 18px #39ff1422; }
+  .color-btn.pink-btn  { color:var(--pink);  border-color:var(--pink);  text-shadow:0 0 8px var(--pink);  box-shadow:0 0 12px #ff2d7844,inset 0 0 10px #ff2d7811; }
+  .color-btn.pink-btn:active  { background:rgba(255,45,120,.12); box-shadow:0 0 22px #ff2d7888,inset 0 0 18px #ff2d7822; }
+  .color-btn.blue-btn  { color:var(--blue);  border-color:var(--blue);  text-shadow:0 0 8px var(--blue);  box-shadow:0 0 12px #00cfff44,inset 0 0 10px #00cfff11; }
+  .color-btn.blue-btn:active  { background:rgba(0,207,255,.12); box-shadow:0 0 22px #00cfff88,inset 0 0 18px #00cfff22; }
 
-  #track-btn.recording {
-    color: #ff3a3a;
-    border-color: #ff3a3a;
-    text-shadow: 0 0 8px #ff3a3a;
-    box-shadow: 0 0 12px #ff3a3a44, inset 0 0 12px #ff3a3a11;
-  }
-
-  #center-btn {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    background: var(--panel);
-    color: var(--muted);
-    border: 1px solid #333;
-    border-radius: 4px;
-    padding: 6px 14px;
-    cursor: pointer;
-    backdrop-filter: blur(12px);
-    -webkit-tap-highlight-color: transparent;
-    transition: color 0.15s, border-color 0.15s;
-  }
-
-  #center-btn:active {
-    color: var(--neon);
-    border-color: rgba(57,255,20,0.4);
-  }
-
-  /* Accuracy badge */
-  #accuracy-badge {
-    position: absolute;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 130px);
-    right: 16px;
-    font-size: 0.55rem;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    background: var(--panel);
-    border: 1px solid #222;
-    border-radius: 3px;
-    padding: 4px 8px;
-    z-index: 10;
+  #stop-btn {
     display: none;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.15rem; letter-spacing: 0.15em;
+    background: transparent; color: #ff3a3a; border: 2px solid #ff3a3a; border-radius: 4px;
+    padding: 9px 32px; cursor: pointer;
+    text-shadow: 0 0 8px #ff3a3a; box-shadow: 0 0 12px #ff3a3a44,inset 0 0 10px #ff3a3a11;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #stop-btn.visible { display: block; }
+
+  #util-btns { display: flex; gap: 8px; }
+  .util-btn {
+    font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.12em;
+    background: var(--panel); color: var(--muted); border: 1px solid #333; border-radius: 4px;
+    padding: 6px 12px; cursor: pointer; backdrop-filter: blur(12px);
+    -webkit-tap-highlight-color: transparent; transition: color .15s, border-color .15s;
+  }
+  .util-btn:active { color: var(--green); border-color: rgba(57,255,20,.4); }
+
+  /* Accuracy */
+  #accuracy-badge {
+    position: absolute; bottom: calc(env(safe-area-inset-bottom,0px) + 170px); right: 16px;
+    font-size: 0.55rem; letter-spacing: 0.1em; color: var(--muted);
+    background: var(--panel); border: 1px solid #222; border-radius: 3px;
+    padding: 4px 8px; z-index: 10; display: none;
   }
 
-  /* Mapbox attribution tweak */
+  /* Modal */
+  #modal-overlay {
+    display: none; position: absolute; inset: 0;
+    background: rgba(0,0,0,.75); z-index: 50;
+    align-items: center; justify-content: center;
+  }
+  #modal-overlay.open { display: flex; }
+
+  #modal {
+    background: #111; border: 1px solid #2a2a2a; border-radius: 6px;
+    padding: 24px 20px; width: min(320px,90vw); font-family: 'Space Mono', monospace;
+  }
+  #modal h2 {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.15em;
+    color: var(--green); text-shadow: 0 0 6px #39ff1466; margin-bottom: 16px;
+  }
+
+  .modal-btn {
+    width: 100%; text-align: left; font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.1em;
+    background: #1a1a1a; color: var(--text); border: 1px solid #333; border-radius: 4px;
+    padding: 10px 14px; cursor: pointer; margin-bottom: 8px; display: block;
+    transition: border-color .15s, color .15s;
+  }
+  .modal-btn:hover { border-color: #555; color: #fff; }
+  .modal-btn.working { color: var(--muted); pointer-events: none; }
+  .modal-btn-label { font-size: 0.55rem; color: var(--muted); display: block; margin-top: 3px; letter-spacing: 0.08em; }
+
+  #modal-close {
+    margin-top: 6px; width: 100%; font-family: 'Space Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.1em;
+    background: transparent; color: var(--muted); border: 1px solid #2a2a2a;
+    border-radius: 4px; padding: 8px; cursor: pointer;
+  }
+  #modal-close:hover { color: #fff; }
+
+  #modal-status {
+    font-size: 0.6rem; color: var(--muted); margin-top: 10px;
+    text-align: center; min-height: 16px; letter-spacing: 0.08em;
+  }
+
+  /* Error */
+  #error-msg {
+    display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    background: #1a1a1a; border: 1px solid #ff3a3a; color: #ff3a3a;
+    font-family: 'Space Mono', monospace; font-size: 0.7rem;
+    padding: 16px 20px; border-radius: 4px; text-align: center;
+    z-index: 99; max-width: 280px; line-height: 1.8; pointer-events: none;
+  }
+
   .mapboxgl-ctrl-attrib { font-size: 9px !important; }
-  .mapboxgl-ctrl-bottom-right { bottom: 40px !important; }
+  .mapboxgl-ctrl-bottom-right { bottom: 50px !important; }
+  #import-input { display: none; }
 </style>
 </head>
 <body>
 
 <div id="map"></div>
-
-<div id="error-msg" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1a1a;border:1px solid #ff3a3a;color:#ff3a3a;font-family:'Space Mono',monospace;font-size:0.7rem;padding:16px 20px;border-radius:4px;text-align:center;z-index:99;max-width:280px;line-height:1.8;pointer-events:none;"></div>
+<div id="error-msg"></div>
+<input type="file" id="import-input" accept=".json,.geojson">
 
 <div id="hud">
   <div id="wordmark">JUICE</div>
@@ -234,207 +199,303 @@
     </div>
   </div>
   <div id="rec-indicator">
-    <div class="rec-dot"></div>
-    TRACKING
+    <div class="rec-dot" id="rec-dot"></div>
+    <span id="rec-label">TRACKING</span>
   </div>
 </div>
 
-<div id="accuracy-badge" id="accuracy-badge">GPS ±<span id="acc-val">?</span>m</div>
+<div id="accuracy-badge">GPS ±<span id="acc-val">?</span>m</div>
 
 <div id="controls">
-  <button id="track-btn" onclick="toggleTracking()">START TRACKING</button>
-  <button id="center-btn" onclick="centerOnMe()">CENTER ON ME</button>
+  <div id="color-btns">
+    <button class="color-btn green-btn" onclick="startTracking('green')">GREEN</button>
+    <button class="color-btn pink-btn"  onclick="startTracking('pink')">PINK</button>
+    <button class="color-btn blue-btn"  onclick="startTracking('blue')">BLUE</button>
+  </div>
+  <button id="stop-btn" onclick="stopTracking()">STOP TRACKING</button>
+  <div id="util-btns">
+    <button class="util-btn" onclick="centerOnMe()">CENTER ON ME</button>
+    <button class="util-btn" onclick="openModal()">IMPORT / EXPORT</button>
+  </div>
+</div>
+
+<div id="modal-overlay">
+  <div id="modal">
+    <h2>IMPORT / EXPORT</h2>
+    <button class="modal-btn" onclick="exportCoords()">
+      EXPORT COORDINATES
+      <span class="modal-btn-label">Downloads raw GPS track data as GeoJSON</span>
+    </button>
+    <button class="modal-btn" id="export-streets-btn" onclick="exportStreets()">
+      EXPORT STREET NAMES
+      <span class="modal-btn-label">Reverse geocodes your tracks — downloads as CSV</span>
+    </button>
+    <button class="modal-btn" onclick="triggerImport()">
+      IMPORT COORDINATES
+      <span class="modal-btn-label">Merges a previously exported GeoJSON into your history</span>
+    </button>
+    <div id="modal-status"></div>
+    <button id="modal-close" onclick="closeModal()">CLOSE</button>
+  </div>
 </div>
 
 <script>
-// ─── CONFIG ──────────────────────────────────────────────────────────────────
 const MAPBOX_TOKEN   = 'pk.eyJ1IjoianVpY2VtYW4zMDAwIiwiYSI6ImNtcDg5ejZ6dTBjZ2Uyc3B4N2t4MnA2bzAifQ.RkAaBAwE8st_1ngjizGFCQ';
 const CUSTOM_STYLE   = 'mapbox://styles/juiceman3000/cmp8atxga006601s80nrqh1gi';
 const FALLBACK_STYLE = 'mapbox://styles/mapbox/dark-v11';
-const STORAGE_KEY    = 'juice_tracks_v1';
-const NEON           = '#39ff14';
+const STORAGE_KEY    = 'juice_tracks_v2';
 const MIN_DIST_M     = 8;
+const COLORS = { green:'#39ff14', pink:'#ff2d78', blue:'#00cfff' };
 
-// ─── STATE ───────────────────────────────────────────────────────────────────
-let gmap       = null;
-let watchId    = null;
-let isTracking = false;
-let sessionCoords = [];
-let allSegments   = [];
-let lastPoint     = null;
-let sessionKm     = 0;
+let gmap=null, watchId=null, isTracking=false, activeColor=null;
+let sessionCoords=[], sessionKm=0, lastPoint=null;
+let allSegments=[];  // [{coords:[[lng,lat],...], color:'green'|'pink'|'blue'}, ...]
 
-// ─── ERROR DISPLAY ───────────────────────────────────────────────────────────
-function showError(msg) {
-  const el = document.getElementById('error-msg');
-  el.innerHTML = msg;
-  el.style.display = 'block';
-}
-function hideError() {
-  document.getElementById('error-msg').style.display = 'none';
-}
-
-// ─── STORAGE ─────────────────────────────────────────────────────────────────
+// ── STORAGE ──
 function save() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(allSegments)); }
-  catch(e) { console.warn('Storage unavailable', e); }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(allSegments)); } catch(e) {}
 }
 function loadSaved() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) allSegments = JSON.parse(raw);
-  } catch(e) { allSegments = []; }
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    // Migrate old format (array of arrays)
+    allSegments = parsed.map(s => Array.isArray(s) ? {coords:s, color:'green'} : s);
+  } catch(e) { allSegments=[]; }
 }
 
-// ─── DISTANCE ────────────────────────────────────────────────────────────────
-function haversineKm(a, b) {
-  const R = 6371;
-  const dLat = (b[1]-a[1]) * Math.PI/180;
-  const dLng = (b[0]-a[0]) * Math.PI/180;
-  const s = Math.sin(dLat/2)**2 +
-            Math.cos(a[1]*Math.PI/180)*Math.cos(b[1]*Math.PI/180)*Math.sin(dLng/2)**2;
-  return R * 2 * Math.asin(Math.sqrt(s));
+// ── ERROR ──
+function showError(msg, ms=0) {
+  const el=document.getElementById('error-msg');
+  el.innerHTML=msg; el.style.display='block';
+  if (ms) setTimeout(()=>el.style.display='none', ms);
 }
-function totalKm(segs) {
-  let km = 0;
-  for (const seg of segs)
-    for (let i = 1; i < seg.length; i++) km += haversineKm(seg[i-1], seg[i]);
-  return km;
+function hideError() { document.getElementById('error-msg').style.display='none'; }
+
+// ── DISTANCE ──
+function hkm(a,b) {
+  const R=6371, r=Math.PI/180;
+  const dLa=(b[1]-a[1])*r, dLo=(b[0]-a[0])*r;
+  const s=Math.sin(dLa/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin(dLo/2)**2;
+  return R*2*Math.asin(Math.sqrt(s));
+}
+function totalKm() {
+  let k=sessionKm;
+  for (const s of allSegments) for (let i=1;i<s.coords.length;i++) k+=hkm(s.coords[i-1],s.coords[i]);
+  return k;
 }
 
-// ─── GEOJSON ─────────────────────────────────────────────────────────────────
+// ── GEOJSON ──
 function buildGeoJSON() {
-  const features = [];
-  for (const seg of allSegments)
-    if (seg.length >= 2) features.push({ type:'Feature', geometry:{ type:'LineString', coordinates:seg } });
-  if (sessionCoords.length >= 2)
-    features.push({ type:'Feature', geometry:{ type:'LineString', coordinates:sessionCoords } });
-  return { type:'FeatureCollection', features };
+  const feats=[];
+  for (const s of allSegments)
+    if (s.coords.length>=2) feats.push({type:'Feature',properties:{color:COLORS[s.color]||COLORS.green},geometry:{type:'LineString',coordinates:s.coords}});
+  if (sessionCoords.length>=2)
+    feats.push({type:'Feature',properties:{color:COLORS[activeColor]||COLORS.green},geometry:{type:'LineString',coordinates:sessionCoords}});
+  return {type:'FeatureCollection',features:feats};
 }
 
-// ─── MAP LAYERS ──────────────────────────────────────────────────────────────
+// ── MAP LAYERS ──
+// Width interpolation: thin at low zoom, thick when close
+const wExpr = ['interpolate',['linear'],['zoom'], 10,1.5, 14,3.5, 17,7, 19,12];
+const gExpr = ['interpolate',['linear'],['zoom'], 10,6,   14,12,  17,22, 19,36];
+
 function addTrackLayers() {
-  gmap.addSource('tracks', { type:'geojson', data:buildGeoJSON() });
-  gmap.addLayer({ id:'tracks-glow', type:'line', source:'tracks',
-    layout:{ 'line-join':'round','line-cap':'round' },
-    paint:{ 'line-color':NEON,'line-width':12,'line-opacity':0.12,'line-blur':6 }
-  });
-  gmap.addLayer({ id:'tracks-line', type:'line', source:'tracks',
-    layout:{ 'line-join':'round','line-cap':'round' },
-    paint:{ 'line-color':NEON,'line-width':3.5,'line-opacity':0.95 }
-  });
+  gmap.addSource('tracks',{type:'geojson',data:buildGeoJSON()});
+  gmap.addLayer({id:'tracks-glow',type:'line',source:'tracks',
+    layout:{'line-join':'round','line-cap':'round'},
+    paint:{'line-color':['get','color'],'line-width':gExpr,'line-opacity':0.11,'line-blur':7}});
+  gmap.addLayer({id:'tracks-line',type:'line',source:'tracks',
+    layout:{'line-join':'round','line-cap':'round'},
+    paint:{'line-color':['get','color'],'line-width':wExpr,'line-opacity':0.95}});
 }
 function updateMap() {
   if (!gmap) return;
-  const src = gmap.getSource('tracks');
+  const src=gmap.getSource('tracks');
   if (src) src.setData(buildGeoJSON());
 }
 
-// ─── STATS ───────────────────────────────────────────────────────────────────
+// ── STATS ──
 function updateStats() {
-  const t = totalKm(allSegments) + sessionKm;
-  const pts = allSegments.reduce((n,s)=>n+s.length,0) + sessionCoords.length;
-  document.getElementById('km-total').textContent   = t.toFixed(2);
+  const pts=allSegments.reduce((n,s)=>n+s.coords.length,0)+sessionCoords.length;
+  document.getElementById('km-total').textContent   = totalKm().toFixed(2);
   document.getElementById('km-session').textContent = sessionKm.toFixed(2);
   document.getElementById('pts-count').textContent  = pts;
 }
 
-// ─── MAP INIT ────────────────────────────────────────────────────────────────
+// ── MAP INIT ──
 function initMap(style) {
   mapboxgl.accessToken = MAPBOX_TOKEN;
-  gmap = new mapboxgl.Map({
-    container: 'map',
-    style: style,
-    center: [-63.5752, 44.6488],
-    zoom: 13,
-    attributionControl: true,
-    logoPosition: 'bottom-left'
+  gmap = new mapboxgl.Map({container:'map',style,center:[-63.5752,44.6488],zoom:13,attributionControl:true,logoPosition:'bottom-left'});
+  gmap.on('error',(e)=>{
+    console.error('Map error:',e);
+    if (style===CUSTOM_STYLE) { gmap.remove(); gmap=null; initMap(FALLBACK_STYLE); }
+    else showError('Map failed to load.<br>Check your connection.');
   });
-
-  gmap.on('error', (e) => {
-    console.error('Mapbox error:', e);
-    if (style === CUSTOM_STYLE) {
-      // Custom style failed — try fallback
-      console.warn('Custom style failed, trying fallback...');
-      gmap.remove();
-      gmap = null;
-      initMap(FALLBACK_STYLE);
-    } else {
-      showError('Map failed to load.<br>Check your internet connection and try again.');
-    }
-  });
-
-  gmap.on('load', () => {
+  gmap.on('load',()=>{
     hideError();
-    if (style === FALLBACK_STYLE) {
-      showError('Using default map style.<br>Custom style could not be loaded.');
-      setTimeout(hideError, 4000);
-    }
-    addTrackLayers();
-    updateMap();
-    updateStats();
+    if (style===FALLBACK_STYLE) showError('Using default map style.',4000);
+    addTrackLayers(); updateMap(); updateStats();
   });
 }
 
-// ─── TRACKING ────────────────────────────────────────────────────────────────
-function toggleTracking() {
-  if (!isTracking) startTracking(); else stopTracking();
-}
+// ── TRACKING ──
+function startTracking(color) {
+  if (isTracking) stopTracking();
+  if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
+  isTracking=true; activeColor=color;
+  sessionCoords=[]; sessionKm=0; lastPoint=null;
 
-function startTracking() {
-  if (!navigator.geolocation) { alert('Geolocation not supported in this browser.'); return; }
-  isTracking = true;
-  sessionCoords = []; sessionKm = 0; lastPoint = null;
-  document.getElementById('track-btn').textContent = 'STOP TRACKING';
-  document.getElementById('track-btn').classList.add('recording');
+  document.getElementById('color-btns').style.opacity='0.4';
+  document.getElementById('color-btns').style.pointerEvents='none';
+  document.getElementById('stop-btn').classList.add('visible');
+  document.getElementById('accuracy-badge').style.display='block';
+
+  const dot=document.getElementById('rec-dot');
+  const lbl=document.getElementById('rec-label');
+  const c=COLORS[color];
+  dot.style.background=c; dot.style.boxShadow=`0 0 8px ${c},0 0 20px ${c}aa`;
+  lbl.textContent=color.toUpperCase()+' TRACKING'; lbl.style.color=c; lbl.style.textShadow=`0 0 4px ${c}`;
   document.getElementById('rec-indicator').classList.add('active');
-  document.getElementById('accuracy-badge').style.display = 'block';
-  watchId = navigator.geolocation.watchPosition(onPosition, onGPSError,
-    { enableHighAccuracy:true, maximumAge:2000, timeout:15000 });
+
+  watchId=navigator.geolocation.watchPosition(onPosition,onGPSError,{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
 }
 
 function stopTracking() {
-  isTracking = false;
-  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
-  document.getElementById('track-btn').textContent = 'START TRACKING';
-  document.getElementById('track-btn').classList.remove('recording');
+  isTracking=false;
+  if (watchId!==null) { navigator.geolocation.clearWatch(watchId); watchId=null; }
+  if (sessionCoords.length>=2) { allSegments.push({coords:[...sessionCoords],color:activeColor}); save(); }
+  sessionCoords=[]; sessionKm=0; lastPoint=null; activeColor=null;
+
+  document.getElementById('color-btns').style.opacity='1';
+  document.getElementById('color-btns').style.pointerEvents='auto';
+  document.getElementById('stop-btn').classList.remove('visible');
+  document.getElementById('accuracy-badge').style.display='none';
   document.getElementById('rec-indicator').classList.remove('active');
-  document.getElementById('accuracy-badge').style.display = 'none';
-  if (sessionCoords.length >= 2) { allSegments.push([...sessionCoords]); save(); }
-  sessionCoords = []; sessionKm = 0; lastPoint = null;
   updateMap(); updateStats();
 }
 
 function onPosition(pos) {
-  const { longitude, latitude, accuracy } = pos.coords;
-  const pt = [longitude, latitude];
-  document.getElementById('acc-val').textContent = Math.round(accuracy);
-  if (accuracy > 60 && sessionCoords.length === 0) return;
+  const {longitude:lng,latitude:lat,accuracy:acc}=pos.coords;
+  const pt=[lng,lat];
+  document.getElementById('acc-val').textContent=Math.round(acc);
+  if (acc>60&&sessionCoords.length===0) return;
   if (lastPoint) {
-    const distM = haversineKm(lastPoint, pt) * 1000;
-    if (distM < MIN_DIST_M) return;
-    sessionKm += distM / 1000;
+    const dm=hkm(lastPoint,pt)*1000;
+    if (dm<MIN_DIST_M) return;
+    sessionKm+=dm/1000;
   }
-  sessionCoords.push(pt);
-  lastPoint = pt;
-  gmap.easeTo({ center:pt, zoom:Math.max(gmap.getZoom(), 15), duration:800 });
+  sessionCoords.push(pt); lastPoint=pt;
+  gmap.easeTo({center:pt,zoom:Math.max(gmap.getZoom(),15),duration:800});
   updateMap(); updateStats();
 }
 
 function onGPSError(err) {
-  console.warn('GPS error:', err.code, err.message);
-  if (err.code === 1) showError('Location access denied.<br>Allow location in Safari Settings.');
+  if (err.code===1) showError('Location access denied.<br>Allow location in Safari Settings.');
 }
 
 function centerOnMe() {
   navigator.geolocation.getCurrentPosition(
-    pos => gmap.flyTo({ center:[pos.coords.longitude, pos.coords.latitude], zoom:15, duration:1000 }),
-    ()  => gmap.flyTo({ center:[-63.5752, 44.6488], zoom:13 }),
-    { enableHighAccuracy:true, timeout:8000 }
+    p=>gmap.flyTo({center:[p.coords.longitude,p.coords.latitude],zoom:15,duration:1000}),
+    ()=>gmap.flyTo({center:[-63.5752,44.6488],zoom:13}),
+    {enableHighAccuracy:true,timeout:8000}
   );
 }
 
-// ─── BOOT ────────────────────────────────────────────────────────────────────
+// ── MODAL ──
+function openModal()  { document.getElementById('modal-overlay').classList.add('open'); setStatus(''); }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function setStatus(m) { document.getElementById('modal-status').textContent=m; }
+
+// ── EXPORT COORDINATES ──
+function exportCoords() {
+  const segs=[...allSegments];
+  if (sessionCoords.length>=2) segs.push({coords:sessionCoords,color:activeColor||'green'});
+  const gj={type:'FeatureCollection',features:segs.map(s=>({
+    type:'Feature',properties:{color:s.color},
+    geometry:{type:'LineString',coordinates:s.coords}
+  }))};
+  dl(JSON.stringify(gj,null,2),`juice_tracks_${ds()}.geojson`,'application/json');
+  setStatus('Coordinates exported.');
+}
+
+// ── EXPORT STREET NAMES ──
+async function exportStreets() {
+  const btn=document.getElementById('export-streets-btn');
+  btn.classList.add('working'); setStatus('Sampling track points...');
+
+  // Sample 1 point per ~50m
+  const pts=[];
+  for (const seg of allSegments) {
+    let acc=0;
+    for (let i=0;i<seg.coords.length;i++) {
+      if (i===0){pts.push(seg.coords[i]);continue;}
+      acc+=hkm(seg.coords[i-1],seg.coords[i])*1000;
+      if (acc>=50){pts.push(seg.coords[i]);acc=0;}
+    }
+  }
+
+  if (!pts.length) { setStatus('No track data to geocode.'); btn.classList.remove('working'); return; }
+  setStatus(`Geocoding ${pts.length} points...`);
+
+  const streets=new Set();
+  const BATCH=4;
+  for (let i=0;i<pts.length;i+=BATCH) {
+    await Promise.all(pts.slice(i,i+BATCH).map(async pt=>{
+      try {
+        const r=await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${pt[0]},${pt[1]}.json?types=address&access_token=${MAPBOX_TOKEN}`);
+        const d=await r.json();
+        if (d.features?.[0]?.text) streets.add(d.features[0].text);
+      } catch(e){}
+    }));
+    setStatus(`Geocoding ${Math.min(i+BATCH,pts.length)}/${pts.length}...`);
+    await new Promise(r=>setTimeout(r,150));
+  }
+
+  if (!streets.size) { setStatus('No street names returned.'); btn.classList.remove('working'); return; }
+  const sorted=[...streets].sort();
+  const csv='Street Name\n'+sorted.map(s=>`"${s.replace(/"/g,'""')}"`).join('\n');
+  dl(csv,`juice_streets_${ds()}.csv`,'text/csv');
+  setStatus(`Exported ${sorted.length} unique streets.`);
+  btn.classList.remove('working');
+}
+
+// ── IMPORT ──
+function triggerImport() { document.getElementById('import-input').click(); }
+
+document.getElementById('import-input').addEventListener('change',function(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try {
+      const gj=JSON.parse(ev.target.result);
+      if (gj.type!=='FeatureCollection') throw new Error('Not a FeatureCollection');
+      let n=0;
+      for (const f of gj.features) {
+        if (f.geometry?.type==='LineString'&&f.geometry.coordinates?.length>=2) {
+          allSegments.push({coords:f.geometry.coordinates,color:f.properties?.color||'green'});
+          n++;
+        }
+      }
+      save(); updateMap(); updateStats();
+      setStatus(`Imported ${n} segment(s).`);
+    } catch(err) { setStatus('Import failed: invalid file.'); }
+  };
+  reader.readAsText(file);
+  this.value='';
+});
+
+// ── UTILS ──
+function ds() { const d=new Date(); return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`; }
+function dl(content,name,type) {
+  const b=new Blob([content],{type});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');
+  a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
+}
+
+// ── BOOT ──
 loadSaved();
 initMap(CUSTOM_STYLE);
 </script>
