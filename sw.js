@@ -1,7 +1,7 @@
-const CACHE = 'juice-v2';
+const CACHE = 'juice-v3';
 const SHELL = [
-  '/juice/',
-  '/juice/index.html',
+  '/Juice/',
+  '/Juice/index.html',
   'https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js',
   'https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css',
   'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap'
@@ -22,21 +22,15 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network first for Mapbox tiles and geocoding (need live data)
-  // Cache first for app shell
   const url = new URL(e.request.url);
-  const isMapboxApi = url.hostname.includes('mapbox.com') && 
-                      (url.pathname.includes('/tiles/') || 
+  const isMapboxApi = url.hostname.includes('mapbox.com') &&
+                      (url.pathname.includes('/tiles/') ||
                        url.pathname.includes('/geocoding/') ||
                        url.pathname.includes('/styles/'));
 
   if (isMapboxApi) {
-    // Network first, fall back to cache
-    e.respondWith(
-      fetch(e.request).catch(() => caches.match(e.request))
-    );
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
   } else {
-    // Cache first, fall back to network
     e.respondWith(
       caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
         const clone = res.clone();
