@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Juice">
+<title>Juice</title>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --neon: #39ff14;
+    --neon-dim: rgba(57, 255, 20, 0.15);
+    --neon-glow: 0 0 8px #39ff14, 0 0 20px #39ff14aa;
+    --bg: #0a0a0a;
+    --panel: rgba(10,10,10,0.88);
+    --text: #e8e8e8;
+    --muted: #555;
+  }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    font-family: 'Space Mono', monospace;
+    color: var(--text);
+  }
+
+  #map {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* HUD */
+  #hud {
+    position: absolute;
+    top: env(safe-area-inset-top, 16px);
+    left: 0; right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    z-index: 10;
+    padding-top: 12px;
+  }
+
+  #wordmark {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    letter-spacing: 0.12em;
+    color: var(--neon);
+    text-shadow: var(--neon-glow);
+    line-height: 1;
+  }
+
+  #stats-bar {
+    margin-top: 6px;
+    background: var(--panel);
+    border: 1px solid rgba(57,255,20,0.25);
+    border-radius: 4px;
+    padding: 6px 18px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    backdrop-filter: blur(12px);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--neon);
+    text-shadow: 0 0 6px #39ff1488;
+    letter-spacing: 0.05em;
+  }
+
+  .stat-label {
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+
+  .stat-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(57,255,20,0.2);
+  }
+
+  /* Recording pulse */
+  #rec-indicator {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    margin-top: 5px;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--neon);
+    text-shadow: 0 0 4px #39ff14;
+  }
+
+  #rec-indicator.active { display: flex; }
+
+  .rec-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--neon);
+    box-shadow: var(--neon-glow);
+    animation: pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(0.7); }
+  }
+
+  /* Controls */
+  #controls {
+    position: absolute;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+  }
+
+  #track-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.15em;
+    background: transparent;
+    color: var(--neon);
+    border: 2px solid var(--neon);
+    border-radius: 4px;
+    padding: 10px 36px;
+    cursor: pointer;
+    text-shadow: 0 0 8px #39ff14;
+    box-shadow: 0 0 12px #39ff1444, inset 0 0 12px #39ff1411;
+    transition: all 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #track-btn:active {
+    background: var(--neon-dim);
+    box-shadow: 0 0 24px #39ff1488, inset 0 0 20px #39ff1422;
+  }
+
+  #track-btn.recording {
+    color: #ff3a3a;
+    border-color: #ff3a3a;
+    text-shadow: 0 0 8px #ff3a3a;
+    box-shadow: 0 0 12px #ff3a3a44, inset 0 0 12px #ff3a3a11;
+  }
+
+  #center-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    background: var(--panel);
+    color: var(--muted);
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 6px 14px;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  #center-btn:active {
+    color: var(--neon);
+    border-color: rgba(57,255,20,0.4);
+  }
+
+  /* Accuracy badge */
+  #accuracy-badge {
+    position: absolute;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 130px);
+    right: 16px;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    background: var(--panel);
+    border: 1px solid #222;
+    border-radius: 3px;
+    padding: 4px 8px;
+    z-index: 10;
+    display: none;
+  }
+
+  /* Mapbox attribution tweak */
+  .mapboxgl-ctrl-attrib { font-size: 9px !important; }
+  .mapboxgl-ctrl-bottom-right { bottom: 40px !important; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="error-msg" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1a1a;border:1px solid #ff3a3a;color:#ff3a3a;font-family:'Space Mono',monospace;font-size:0.7rem;padding:16px 20px;border-radius:4px;text-align:center;z-index:99;max-width:280px;line-height:1.8;pointer-events:none;"></div>
+
+<div id="hud">
+  <div id="wordmark">JUICE</div>
+  <div id="stats-bar">
+    <div class="stat">
+      <span class="stat-value" id="km-total">0.00</span>
+      <span class="stat-label">km total</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <span class="stat-value" id="km-session">0.00</span>
+      <span class="stat-label">km session</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <span class="stat-value" id="pts-count">0</span>
+      <span class="stat-label">waypoints</span>
+    </div>
+  </div>
+  <div id="rec-indicator">
+    <div class="rec-dot"></div>
+    TRACKING
+  </div>
+</div>
+
+<div id="accuracy-badge" id="accuracy-badge">GPS ±<span id="acc-val">?</span>m</div>
+
+<div id="controls">
+  <button id="track-btn" onclick="toggleTracking()">START TRACKING</button>
+  <button id="center-btn" onclick="centerOnMe()">CENTER ON ME</button>
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const MAPBOX_TOKEN   = 'pk.eyJ1IjoianVpY2VtYW4zMDAwIiwiYSI6ImNtcDg5ejZ6dTBjZ2Uyc3B4N2t4MnA2bzAifQ.RkAaBAwE8st_1ngjizGFCQ';
+const CUSTOM_STYLE   = 'mapbox://styles/juiceman3000/cmp8atxga006601s80nrqh1gi';
+const FALLBACK_STYLE = 'mapbox://styles/mapbox/dark-v11';
+const STORAGE_KEY    = 'juice_tracks_v1';
+const NEON           = '#39ff14';
+const MIN_DIST_M     = 8;
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let gmap       = null;
+let watchId    = null;
+let isTracking = false;
+let sessionCoords = [];
+let allSegments   = [];
+let lastPoint     = null;
+let sessionKm     = 0;
+
+// ─── ERROR DISPLAY ───────────────────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.innerHTML = msg;
+  el.style.display = 'block';
+}
+function hideError() {
+  document.getElementById('error-msg').style.display = 'none';
+}
+
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(allSegments)); }
+  catch(e) { console.warn('Storage unavailable', e); }
+}
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) allSegments = JSON.parse(raw);
+  } catch(e) { allSegments = []; }
+}
+
+// ─── DISTANCE ────────────────────────────────────────────────────────────────
+function haversineKm(a, b) {
+  const R = 6371;
+  const dLat = (b[1]-a[1]) * Math.PI/180;
+  const dLng = (b[0]-a[0]) * Math.PI/180;
+  const s = Math.sin(dLat/2)**2 +
+            Math.cos(a[1]*Math.PI/180)*Math.cos(b[1]*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.asin(Math.sqrt(s));
+}
+function totalKm(segs) {
+  let km = 0;
+  for (const seg of segs)
+    for (let i = 1; i < seg.length; i++) km += haversineKm(seg[i-1], seg[i]);
+  return km;
+}
+
+// ─── GEOJSON ─────────────────────────────────────────────────────────────────
+function buildGeoJSON() {
+  const features = [];
+  for (const seg of allSegments)
+    if (seg.length >= 2) features.push({ type:'Feature', geometry:{ type:'LineString', coordinates:seg } });
+  if (sessionCoords.length >= 2)
+    features.push({ type:'Feature', geometry:{ type:'LineString', coordinates:sessionCoords } });
+  return { type:'FeatureCollection', features };
+}
+
+// ─── MAP LAYERS ──────────────────────────────────────────────────────────────
+function addTrackLayers() {
+  gmap.addSource('tracks', { type:'geojson', data:buildGeoJSON() });
+  gmap.addLayer({ id:'tracks-glow', type:'line', source:'tracks',
+    layout:{ 'line-join':'round','line-cap':'round' },
+    paint:{ 'line-color':NEON,'line-width':12,'line-opacity':0.12,'line-blur':6 }
+  });
+  gmap.addLayer({ id:'tracks-line', type:'line', source:'tracks',
+    layout:{ 'line-join':'round','line-cap':'round' },
+    paint:{ 'line-color':NEON,'line-width':3.5,'line-opacity':0.95 }
+  });
+}
+function updateMap() {
+  if (!gmap) return;
+  const src = gmap.getSource('tracks');
+  if (src) src.setData(buildGeoJSON());
+}
+
+// ─── STATS ───────────────────────────────────────────────────────────────────
+function updateStats() {
+  const t = totalKm(allSegments) + sessionKm;
+  const pts = allSegments.reduce((n,s)=>n+s.length,0) + sessionCoords.length;
+  document.getElementById('km-total').textContent   = t.toFixed(2);
+  document.getElementById('km-session').textContent = sessionKm.toFixed(2);
+  document.getElementById('pts-count').textContent  = pts;
+}
+
+// ─── MAP INIT ────────────────────────────────────────────────────────────────
+function initMap(style) {
+  mapboxgl.accessToken = MAPBOX_TOKEN;
+  gmap = new mapboxgl.Map({
+    container: 'map',
+    style: style,
+    center: [-63.5752, 44.6488],
+    zoom: 13,
+    attributionControl: true,
+    logoPosition: 'bottom-left'
+  });
+
+  gmap.on('error', (e) => {
+    console.error('Mapbox error:', e);
+    if (style === CUSTOM_STYLE) {
+      // Custom style failed — try fallback
+      console.warn('Custom style failed, trying fallback...');
+      gmap.remove();
+      gmap = null;
+      initMap(FALLBACK_STYLE);
+    } else {
+      showError('Map failed to load.<br>Check your internet connection and try again.');
+    }
+  });
+
+  gmap.on('load', () => {
+    hideError();
+    if (style === FALLBACK_STYLE) {
+      showError('Using default map style.<br>Custom style could not be loaded.');
+      setTimeout(hideError, 4000);
+    }
+    addTrackLayers();
+    updateMap();
+    updateStats();
+  });
+}
+
+// ─── TRACKING ────────────────────────────────────────────────────────────────
+function toggleTracking() {
+  if (!isTracking) startTracking(); else stopTracking();
+}
+
+function startTracking() {
+  if (!navigator.geolocation) { alert('Geolocation not supported in this browser.'); return; }
+  isTracking = true;
+  sessionCoords = []; sessionKm = 0; lastPoint = null;
+  document.getElementById('track-btn').textContent = 'STOP TRACKING';
+  document.getElementById('track-btn').classList.add('recording');
+  document.getElementById('rec-indicator').classList.add('active');
+  document.getElementById('accuracy-badge').style.display = 'block';
+  watchId = navigator.geolocation.watchPosition(onPosition, onGPSError,
+    { enableHighAccuracy:true, maximumAge:2000, timeout:15000 });
+}
+
+function stopTracking() {
+  isTracking = false;
+  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  document.getElementById('track-btn').textContent = 'START TRACKING';
+  document.getElementById('track-btn').classList.remove('recording');
+  document.getElementById('rec-indicator').classList.remove('active');
+  document.getElementById('accuracy-badge').style.display = 'none';
+  if (sessionCoords.length >= 2) { allSegments.push([...sessionCoords]); save(); }
+  sessionCoords = []; sessionKm = 0; lastPoint = null;
+  updateMap(); updateStats();
+}
+
+function onPosition(pos) {
+  const { longitude, latitude, accuracy } = pos.coords;
+  const pt = [longitude, latitude];
+  document.getElementById('acc-val').textContent = Math.round(accuracy);
+  if (accuracy > 60 && sessionCoords.length === 0) return;
+  if (lastPoint) {
+    const distM = haversineKm(lastPoint, pt) * 1000;
+    if (distM < MIN_DIST_M) return;
+    sessionKm += distM / 1000;
+  }
+  sessionCoords.push(pt);
+  lastPoint = pt;
+  gmap.easeTo({ center:pt, zoom:Math.max(gmap.getZoom(), 15), duration:800 });
+  updateMap(); updateStats();
+}
+
+function onGPSError(err) {
+  console.warn('GPS error:', err.code, err.message);
+  if (err.code === 1) showError('Location access denied.<br>Allow location in Safari Settings.');
+}
+
+function centerOnMe() {
+  navigator.geolocation.getCurrentPosition(
+    pos => gmap.flyTo({ center:[pos.coords.longitude, pos.coords.latitude], zoom:15, duration:1000 }),
+    ()  => gmap.flyTo({ center:[-63.5752, 44.6488], zoom:13 }),
+    { enableHighAccuracy:true, timeout:8000 }
+  );
+}
+
+// ─── BOOT ────────────────────────────────────────────────────────────────────
+loadSaved();
+initMap(CUSTOM_STYLE);
+</script>
+</body>
+</html>
